@@ -78,10 +78,10 @@ export function ModelSelector({ selectedModel, onSelect }: ModelSelectorProps) {
   };
 
   return (
-    <div className="relative" ref={containerRef}>
+    <div className="relative app-no-drag" ref={containerRef}>
       <button
         onClick={() => setIsOpen(prev => !prev)}
-        className="flex items-center gap-2 px-3 py-2 text-gray-900 dark:text-gray-100 hover:text-theme-primary rounded-claude-sm hover:bg-pampas/50 dark:hover:bg-dark-bg/50 focus:outline-none transition-colors font-sans cursor-pointer text-base"
+        className="app-no-drag flex items-center gap-2 px-3 py-2 text-gray-900 dark:text-gray-100 hover:text-theme-primary rounded-claude-sm hover:bg-pampas/50 dark:hover:bg-dark-bg/50 focus:outline-none transition-colors font-sans cursor-pointer text-base"
       >
         <span>{selectedModelName}</span>
         <svg

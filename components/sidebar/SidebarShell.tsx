@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { MouseEvent as ReactMouseEvent, useEffect, useRef, useState } from 'react';
 import { Conversation, Project } from '@/types/chat';
 import { storage } from '@/lib/storage';
 import { SidebarHeader } from './SidebarHeader';
@@ -20,6 +20,8 @@ interface SidebarShellProps {
   onRenameConversation: (id: string, newTitle: string) => void;
   onConversationsUpdate?: () => void;
   isOpen: boolean;
+  width: number;
+  onWidthChange: (width: number) => void;
 }
 
 export function SidebarShell({
@@ -31,6 +33,8 @@ export function SidebarShell({
   onRenameConversation,
   onConversationsUpdate,
   isOpen,
+  width,
+  onWidthChange,
 }: SidebarShellProps) {
   const [projects, setProjects] = useState<Project[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -134,13 +138,59 @@ export function SidebarShell({
   const hasConversations = conversations.length > 0;
   const hasProjects = projects.length > 0;
 
+  const sidebarRef = useRef<HTMLDivElement>(null);
+
+  const handleResizeStart = (event: ReactMouseEvent<HTMLDivElement>) => {
+    event.preventDefault();
+
+    const el = sidebarRef.current;
+    if (!el) return;
+
+    // Disable CSS transition during drag so width updates instantly
+    el.style.transition = 'none';
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      const nextWidth = Math.min(Math.max(moveEvent.clientX, 240), 420);
+      el.style.width = `${nextWidth}px`;
+    };
+
+    const handleMouseUp = () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      // Re-enable CSS transition
+      el.style.transition = '';
+      // Finalize width in React state
+      const finalWidth = Math.min(Math.max(el.offsetWidth, 240), 420);
+      onWidthChange(finalWidth);
+    };
+
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  };
+
   return (
     <aside
       className={`relative h-full flex flex-col flex-shrink-0 bg-pure-white dark:bg-dark-gray transition-[transform,width] duration-300 ease-in-out ${
-        isOpen ? 'w-72 translate-x-0 border-r border-pure-black/10 dark:border-pure-white/10 shadow-claude-md' : 'w-72 -translate-x-full md:w-0 md:translate-x-0 md:border-r-0 md:shadow-none'
+        isOpen ? 'translate-x-0 border-r border-pure-black/25 dark:border-pure-white/20 shadow-[4px_0_16px_rgba(0,0,0,0.08)] dark:shadow-[4px_0_16px_rgba(0,0,0,0.35)]' : '-translate-x-full md:w-0 md:translate-x-0 md:border-r-0 md:shadow-none'
       } font-sans overflow-hidden`}
+      ref={sidebarRef}
+      style={{ width: isOpen ? width : 0 }}
     >
+      {isOpen && (
+        <div
+          onMouseDown={handleResizeStart}
+          className="app-no-drag absolute right-0 top-0 z-40 h-full w-1 cursor-col-resize bg-transparent hover:bg-pure-black/20 dark:hover:bg-pure-white/25 transition-colors"
+          aria-label="Resize sidebar"
+          role="separator"
+        />
+      )}
+
       <SidebarHeader
+        sidebarOpen={isOpen}
         onNewChat={onNewChat}
         onCreateProject={handleCreateProject}
         showSearch={hasConversations}

@@ -39,6 +39,7 @@ export function ChatShell() {
   useTheme(); // Initialize theme system
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarWidth, setSidebarWidth] = useState(288);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -46,11 +47,22 @@ export function ChatShell() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    const savedSidebarWidth = Number(localStorage.getItem('ai-nexus-sidebar-width'));
+    if (savedSidebarWidth) {
+      setSidebarWidth(Math.min(Math.max(savedSidebarWidth, 240), 420));
+    }
+
     if (window.innerWidth < 768) {
       setSidebarOpen(false);
     } else {
       setSidebarOpen(true);
     }
+  }, []);
+
+  const handleSidebarWidthChange = useCallback((width: number) => {
+    const nextWidth = Math.min(Math.max(width, 240), 420);
+    setSidebarWidth(nextWidth);
+    localStorage.setItem('ai-nexus-sidebar-width', String(nextWidth));
   }, []);
 
   useEffect(() => {
@@ -123,6 +135,8 @@ export function ChatShell() {
         onRenameConversation={handleRenameConversation}
         onConversationsUpdate={handleConversationsUpdate}
         isOpen={sidebarOpen}
+        width={sidebarWidth}
+        onWidthChange={handleSidebarWidthChange}
       />
 
       <div className="flex-1 flex flex-col overflow-hidden">

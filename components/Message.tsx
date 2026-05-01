@@ -17,6 +17,15 @@ export default function Message({ message }: MessageProps) {
   // Start expanded if there's thinking content, collapse when final content arrives
   const hasContent = message.content && message.content.trim().length > 0;
   const [thinkingExpanded, setThinkingExpanded] = useState(true);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    if (!message.content) return;
+
+    await navigator.clipboard.writeText(message.content);
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 2000);
+  };
 
   // Auto-collapse when content arrives (but only once)
   const [hasCollapsed, setHasCollapsed] = useState(false);
@@ -103,12 +112,36 @@ export default function Message({ message }: MessageProps) {
         )}
 
         <div
-          className={`rounded-claude-md px-6 py-5 ${
+          className={`relative rounded-claude-md px-6 py-5 ${
             isUser
               ? 'bg-pure-white dark:bg-dark-gray text-pure-black dark:text-pure-white shadow-claude-sm border border-pure-black/10 dark:border-pure-white/10'
               : 'bg-pure-white/5 dark:bg-dark-gray/5 text-pure-black dark:text-pure-white shadow-claude-sm border border-pure-black/10 dark:border-pure-white/10'
           }`}
         >
+        {!isUser && hasContent && (
+          <button
+            onClick={handleCopy}
+            className="absolute right-3 top-3 flex items-center gap-1.5 rounded-claude-sm border border-pure-black/10 dark:border-pure-white/10 bg-pure-white/90 dark:bg-dark-gray/90 px-2.5 py-1.5 text-xs font-medium text-neutral-gray hover:text-theme-primary hover:bg-pure-white dark:hover:bg-dark-gray shadow-claude-sm transition-colors"
+            aria-label="Copy assistant response"
+            title="Copy response"
+          >
+            {copied ? (
+              <>
+                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                Copied
+              </>
+            ) : (
+              <>
+                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+                Copy
+              </>
+            )}
+          </button>
+        )}
 
         {/* Display attached files */}
         {message.files && message.files.length > 0 && (
@@ -146,7 +179,7 @@ export default function Message({ message }: MessageProps) {
             {message.content}
           </p>
         ) : (
-          <div className="prose prose-sm max-w-none prose-p:leading-relaxed prose-pre:p-0 prose-pre:m-0 font-sans">
+          <div className="prose prose-sm max-w-none prose-p:leading-relaxed prose-pre:p-0 prose-pre:m-0 font-sans pr-16">
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               components={{

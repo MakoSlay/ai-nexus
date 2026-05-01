@@ -165,9 +165,10 @@ export async function startNextServer(): Promise<string> {
   initLogger();
 
   // Use different ports for dev vs production
-  // Dev: 3000 (matches yarn dev)
+  // Dev: 3000 by default, override with AI_NEXUS_DEV_PORT if needed
   // Production: 54321 (safe port, unlikely to conflict)
-  const PORT = app.isPackaged ? 54321 : 3000;
+  const DEV_PORT = Number(process.env.AI_NEXUS_DEV_PORT || 3000);
+  const PORT = app.isPackaged ? 54321 : DEV_PORT;
 
   // Use 127.0.0.1 (IPv4) instead of localhost to avoid IPv6 connection issues
   const serverUrl = app.isPackaged

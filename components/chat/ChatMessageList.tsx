@@ -105,8 +105,8 @@ export function ChatMessageList({
       className="flex-1 overflow-y-auto relative [scrollbar-width:none] [-ms-overflow-style:'none'] [&::-webkit-scrollbar]:hidden"
       ref={containerRef}
       style={{
-        maskImage: 'linear-gradient(to bottom, black 0%, black calc(100% - 120px), transparent 100%)',
-        WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black calc(100% - 120px), transparent 100%)',
+        maskImage: 'linear-gradient(to bottom, black 0%, black calc(100% - 25px), transparent 100%)',
+        WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black calc(100% - 25px), transparent 100%)',
       }}
     >
       <div className="max-w-[900px] mx-auto min-h-full flex flex-col pb-[20px]">
